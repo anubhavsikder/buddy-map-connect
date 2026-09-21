@@ -142,7 +142,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
