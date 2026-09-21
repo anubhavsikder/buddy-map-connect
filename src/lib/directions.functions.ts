@@ -14,14 +14,14 @@ export type RouteStep = {
   mode: string;
   instruction: string;
   distanceMeters: number;
-  line?: string;
-  vehicle?: string;
-  headsign?: string;
-  departureStop?: string;
-  arrivalStop?: string;
-  departureTime?: string;
-  arrivalTime?: string;
-  numStops?: number;
+  line?: string | undefined;
+  vehicle?: string | undefined;
+  headsign?: string | undefined;
+  departureStop?: string | undefined;
+  arrivalStop?: string | undefined;
+  departureTime?: string | undefined;
+  arrivalTime?: string | undefined;
+  numStops?: number | undefined;
 };
 
 export type RoutePlan = {
