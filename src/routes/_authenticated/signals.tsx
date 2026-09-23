@@ -146,7 +146,15 @@ function SignalsScreen() {
                   ? `You ${p.kind === "ring" ? "rang" : "pinged"} ${nameOf(p.to_user)}`
                   : `${nameOf(p.from_user)} ${p.kind === "ring" ? "rang you" : "pinged you"}`}
               </p>
-              <p className="text-xs text-muted-foreground">{formatAgo(p.created_at)}</p>
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                {formatAgo(p.created_at)}
+                {p.from_user === user?.id && (
+                  <span className={`ml-1 inline-flex items-center gap-1 ${p.seen ? "text-accent" : ""}`}>
+                    {p.seen ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+                    {p.seen ? "Seen" : "Delivered"}
+                  </span>
+                )}
+              </p>
             </li>
           ))}
           {pings.length === 0 && <p className="text-sm text-muted-foreground">No signals yet.</p>}
