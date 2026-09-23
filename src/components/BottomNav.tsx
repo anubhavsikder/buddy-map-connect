@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Map, Users, Radio } from "lucide-react";
+import { Map, Users, Radio, Route } from "lucide-react";
 
 const items = [
   { to: "/map", label: "Map", icon: Map },
+  { to: "/plan", label: "Plan", icon: Route },
   { to: "/buddies", label: "Buddies", icon: Users },
   { to: "/signals", label: "Signals", icon: Radio },
 ] as const;
