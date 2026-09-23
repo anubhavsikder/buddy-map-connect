@@ -32,15 +32,6 @@ export const Route = createFileRoute("/_authenticated/signals")({
   component: SignalsScreen,
 });
 
-type Ping = {
-  id: string;
-  from_user: string;
-  to_user: string;
-  kind: string;
-  message: string | null;
-  created_at: string;
-};
-
 function SignalsScreen() {
   const { user } = useUser();
   const [buddies, setBuddies] = useState<Buddy[]>([]);
@@ -51,15 +42,15 @@ function SignalsScreen() {
     if (!user) return;
     const rows = await fetchBuddies(user.id);
     setBuddies(rows);
-    const { data } = await supabase
-      .from("pings")
-      .select("id, from_user, to_user, kind, message, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    const list = (data ?? []) as Ping[];
+    const list = await fetchPings().catch(() => [] as Ping[]);
     setPings(list);
     const ids = Array.from(new Set(list.flatMap((p) => [p.from_user, p.to_user])));
     setPeople(await fetchProfiles(ids));
+    const unseen = list.filter((p) => p.to_user === user.id && !p.seen).map((p) => p.id);
+    if (unseen.length > 0) {
+      await markPingsSeen(unseen).catch(() => undefined);
+      setPings((prev) => prev.map((p) => (unseen.includes(p.id) ? { ...p, seen: true } : p)));
+    }
   }, [user]);
 
   useEffect(() => {
