@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Bell, Radio } from "lucide-react";
+import { Bell, Check, CheckCheck, Radio } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { useUser } from "@/hooks/useAuth";
 import { formatAgo } from "@/lib/geo";
-import { fetchBuddies, fetchProfiles, sendPing, type Buddy, type Profile } from "@/lib/warbuddy";
+import {
+  fetchBuddies,
+  fetchPings,
+  fetchProfiles,
+  markPingsSeen,
+  sendPing,
+  type Buddy,
+  type Ping,
+  type Profile,
+} from "@/lib/warbuddy";
 import { ensureNotificationPermission, ringPhone, showNotification, vibrate } from "@/lib/alerts";
 import { supabase } from "@/integrations/supabase/client";
 
