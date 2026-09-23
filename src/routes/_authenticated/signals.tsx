@@ -79,6 +79,14 @@ function SignalsScreen() {
           void load();
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "pings", filter: `from_user=eq.${user.id}` },
+        (payload) => {
+          const updated = payload.new as Ping;
+          setPings((prev) => prev.map((p) => (p.id === updated.id ? { ...p, seen: updated.seen } : p)));
+        },
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
