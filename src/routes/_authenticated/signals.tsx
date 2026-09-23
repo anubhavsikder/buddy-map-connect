@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Bell, Radio } from "lucide-react";
+import { Bell, Check, CheckCheck, Radio } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { useUser } from "@/hooks/useAuth";
 import { formatAgo } from "@/lib/geo";
-import { fetchBuddies, fetchProfiles, sendPing, type Buddy, type Profile } from "@/lib/warbuddy";
+import {
+  fetchBuddies,
+  fetchPings,
+  fetchProfiles,
+  markPingsSeen,
+  sendPing,
+  type Buddy,
+  type Ping,
+  type Profile,
+} from "@/lib/warbuddy";
 import { ensureNotificationPermission, ringPhone, showNotification, vibrate } from "@/lib/alerts";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,15 +32,6 @@ export const Route = createFileRoute("/_authenticated/signals")({
   component: SignalsScreen,
 });
 
-type Ping = {
-  id: string;
-  from_user: string;
-  to_user: string;
-  kind: string;
-  message: string | null;
-  created_at: string;
-};
-
 function SignalsScreen() {
   const { user } = useUser();
   const [buddies, setBuddies] = useState<Buddy[]>([]);
@@ -42,15 +42,15 @@ function SignalsScreen() {
     if (!user) return;
     const rows = await fetchBuddies(user.id);
     setBuddies(rows);
-    const { data } = await supabase
-      .from("pings")
-      .select("id, from_user, to_user, kind, message, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    const list = (data ?? []) as Ping[];
+    const list = await fetchPings().catch(() => [] as Ping[]);
     setPings(list);
     const ids = Array.from(new Set(list.flatMap((p) => [p.from_user, p.to_user])));
     setPeople(await fetchProfiles(ids));
+    const unseen = list.filter((p) => p.to_user === user.id && !p.seen).map((p) => p.id);
+    if (unseen.length > 0) {
+      await markPingsSeen(unseen).catch(() => undefined);
+      setPings((prev) => prev.map((p) => (unseen.includes(p.id) ? { ...p, seen: true } : p)));
+    }
   }, [user]);
 
   useEffect(() => {
@@ -77,6 +77,14 @@ function SignalsScreen() {
             showNotification("WARBUDDY", "A buddy is signalling you.");
           }
           void load();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "pings", filter: `from_user=eq.${user.id}` },
+        (payload) => {
+          const updated = payload.new as Ping;
+          setPings((prev) => prev.map((p) => (p.id === updated.id ? { ...p, seen: updated.seen } : p)));
         },
       )
       .subscribe();
@@ -138,7 +146,15 @@ function SignalsScreen() {
                   ? `You ${p.kind === "ring" ? "rang" : "pinged"} ${nameOf(p.to_user)}`
                   : `${nameOf(p.from_user)} ${p.kind === "ring" ? "rang you" : "pinged you"}`}
               </p>
-              <p className="text-xs text-muted-foreground">{formatAgo(p.created_at)}</p>
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                {formatAgo(p.created_at)}
+                {p.from_user === user?.id && (
+                  <span className={`ml-1 inline-flex items-center gap-1 ${p.seen ? "text-accent" : ""}`}>
+                    {p.seen ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+                    {p.seen ? "Seen" : "Delivered"}
+                  </span>
+                )}
+              </p>
             </li>
           ))}
           {pings.length === 0 && <p className="text-sm text-muted-foreground">No signals yet.</p>}
