@@ -147,6 +147,32 @@ export async function setSharing(userId: string, sharing: boolean) {
   if (error) throw error;
 }
 
+export type Ping = {
+  id: string;
+  from_user: string;
+  to_user: string;
+  kind: string;
+  message: string | null;
+  seen: boolean;
+  created_at: string;
+};
+
+export async function fetchPings(): Promise<Ping[]> {
+  const { data, error } = await supabase
+    .from("pings")
+    .select("id, from_user, to_user, kind, message, seen, created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) throw error;
+  return (data ?? []) as Ping[];
+}
+
+export async function markPingsSeen(ids: string[]) {
+  if (ids.length === 0) return;
+  const { error } = await supabase.from("pings").update({ seen: true }).in("id", ids);
+  if (error) throw error;
+}
+
 export async function sendPing(
   fromUser: string,
   toUser: string,

@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBuddiesRouteImport } from './routes/_authenticated/buddies'
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
+import { Route as AuthenticatedPlanRouteImport } from './routes/_authenticated/plan'
 import { Route as AuthenticatedSignalsRouteImport } from './routes/_authenticated/signals'
 
 const IndexRoute = IndexRouteImport.update({
@@ -40,6 +41,11 @@ const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPlanRoute = AuthenticatedPlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSignalsRoute = AuthenticatedSignalsRouteImport.update({
   id: '/signals',
   path: '/signals',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/buddies': typeof AuthenticatedBuddiesRoute
   '/map': typeof AuthenticatedMapRoute
+  '/plan': typeof AuthenticatedPlanRoute
   '/signals': typeof AuthenticatedSignalsRoute
 }
 export interface FileRoutesByTo {
@@ -58,6 +65,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/buddies': typeof AuthenticatedBuddiesRoute
   '/map': typeof AuthenticatedMapRoute
+  '/plan': typeof AuthenticatedPlanRoute
   '/signals': typeof AuthenticatedSignalsRoute
 }
 export interface FileRoutesById {
@@ -67,13 +75,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/buddies': typeof AuthenticatedBuddiesRoute
   '/_authenticated/map': typeof AuthenticatedMapRoute
+  '/_authenticated/plan': typeof AuthenticatedPlanRoute
   '/_authenticated/signals': typeof AuthenticatedSignalsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/buddies' | '/map' | '/signals'
+  fullPaths: '/' | '/auth' | '/buddies' | '/map' | '/plan' | '/signals'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/buddies' | '/map' | '/signals'
+  to: '/' | '/auth' | '/buddies' | '/map' | '/plan' | '/signals'
   id:
     | '__root__'
     | '/'
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/buddies'
     | '/_authenticated/map'
+    | '/_authenticated/plan'
     | '/_authenticated/signals'
   fileRoutesById: FileRoutesById
 }
@@ -127,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMapRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/plan': {
+      id: '/_authenticated/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof AuthenticatedPlanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/signals': {
       id: '/_authenticated/signals'
       path: '/signals'
@@ -140,12 +157,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBuddiesRoute: typeof AuthenticatedBuddiesRoute
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
+  AuthenticatedPlanRoute: typeof AuthenticatedPlanRoute
   AuthenticatedSignalsRoute: typeof AuthenticatedSignalsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBuddiesRoute: AuthenticatedBuddiesRoute,
   AuthenticatedMapRoute: AuthenticatedMapRoute,
+  AuthenticatedPlanRoute: AuthenticatedPlanRoute,
   AuthenticatedSignalsRoute: AuthenticatedSignalsRoute,
 }
 
